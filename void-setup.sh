@@ -39,7 +39,6 @@ PACKAGES=(
   intel-gpu-tools
 )
 
-TMUX_CONF_URL="https://gist.githubusercontent.com/Theo-Silfa/974090f9d130f4ee13041c1fc32861dd/raw/.tmux.conf"
 NVIM_REPO="https://github.com/Theo-Silfa/init.lua.git"
 NVIM_BRANCH="upgrade-to-v0.12"
 DOTFILES_REPO="https://github.com/Theo-Silfa/dotfiles.git"
@@ -101,9 +100,6 @@ else
 fi
 
 # ---------- user: dotfiles ----------
-log "Installing tmux config for $TARGET_USER"
-as_user mkdir -p "$TARGET_HOME/.config/tmux"
-as_user curl -fsSL "$TMUX_CONF_URL" -o "$TARGET_HOME/.config/tmux/tmux.conf"
 
 log "Installing tmux plugin manager (tpm) for $TARGET_USER"
 TPM_DIR="$TARGET_HOME/.tmux/plugins/tpm"
@@ -144,6 +140,14 @@ if [[ -e "$SWAY_CONF" && ! -L "$SWAY_CONF" ]]; then
   as_user mv "$SWAY_CONF" "$SWAY_CONF.bak.$(date +%s)"
 fi
 as_user ln -sfn "$DOTFILES_DIR/sway/config" "$SWAY_CONF"
+
+log "Linking tmux config"
+TMUX_CONF="$TARGET_HOME/.config/tmux/tmux.conf"
+as_user mkdir -p "$TARGET_HOME/.config/tmux"
+if [[ -e "$TMUX_CONF" && ! -L "$TMUX_CONF" ]]; then
+  as_user mv "$TMUX_CONF" "$TMUX_CONF.bak.$(date +%s)"
+fi
+as_user ln -sfn "$DOTFILES_DIR/tmux/tmux.conf" "$TMUX_CONF"
 
 log "Linking bashrc"
 BASHRC="$TARGET_HOME/.bashrc"

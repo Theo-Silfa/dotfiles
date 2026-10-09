@@ -4,6 +4,7 @@ Personal dotfiles.
 
 - `sway/config` -> `~/.config/sway/config`
 - `bashrc` -> `~/.bashrc`
+- `tmux/tmux.conf` -> `~/.config/tmux/tmux.conf`
 
 ## Void Linux setup
 

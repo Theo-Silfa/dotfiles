@@ -37,6 +37,14 @@ PACKAGES=(
   intel-media-driver
   libva-intel-driver
   intel-gpu-tools
+  # graphics drivers and firmware
+  mesa-dri
+  linux-firmware-intel
+  linux-firmware-amd
+  # session: system bus, user services, seat management
+  dbus
+  turnstile
+  seatd
 )
 
 NVIM_REPO="https://github.com/Theo-Silfa/init.lua.git"
@@ -62,6 +70,27 @@ xbps-install -y "${PACKAGES[@]}"
 
 log "Cleaning package cache and orphans"
 xbps-remove -Ooy || true
+
+# ---------- root: runit services and groups ----------
+SERVICES=(
+  dbus
+  turnstiled
+  seatd
+)
+
+log "Enabling runit services: ${SERVICES[*]}"
+for svc in "${SERVICES[@]}"; do
+  if [[ ! -d "/etc/sv/$svc" ]]; then
+    echo "Warning: /etc/sv/$svc not found, skipping" >&2
+  elif [[ -e "/var/service/$svc" ]]; then
+    echo "$svc already enabled"
+  else
+    ln -s "/etc/sv/$svc" /var/service/
+  fi
+done
+
+log "Adding $TARGET_USER to the _seatd group"
+usermod -aG _seatd "$TARGET_USER"
 
 # ---------- root: GRUB kernel parameters ----------
 GRUB_PARAMS=(

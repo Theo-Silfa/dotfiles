@@ -45,6 +45,7 @@ PACKAGES=(
   dbus
   turnstile
   seatd
+  NetworkManager
 )
 
 NVIM_REPO="https://github.com/Theo-Silfa/init.lua.git"
@@ -76,6 +77,7 @@ SERVICES=(
   dbus
   turnstiled
   seatd
+  NetworkManager
 )
 
 log "Enabling runit services: ${SERVICES[*]}"

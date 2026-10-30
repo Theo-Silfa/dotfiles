@@ -28,7 +28,6 @@ PACKAGES=(
   tree-sitter-cli
   mangowc
   ghostty
-  fuzzel
   bash-completion
   wl-clipboard
   # Intel essentials (sway wiki, "Intel users")
@@ -46,6 +45,7 @@ PACKAGES=(
   turnstile
   seatd
   NetworkManager
+  noctalia
 )
 
 NVIM_REPO="https://github.com/Theo-Silfa/init.lua.git"
@@ -61,6 +61,9 @@ xbps-install -Suy xbps
 
 log "Enabling nonfree repository (needed for intel-ucode)"
 xbps-install -Sy void-repo-nonfree
+
+log "Enabling Noctalia repository (universalrepo)"
+echo 'repository=https://universalrepo.pages.dev/void' > /etc/xbps.d/10-universalrepository.conf
 xbps-install -S
 
 log "Updating system"
@@ -78,6 +81,7 @@ SERVICES=(
   turnstiled
   seatd
   NetworkManager
+  noctalia
 )
 
 log "Enabling runit services: ${SERVICES[*]}"

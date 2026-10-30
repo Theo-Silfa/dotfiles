@@ -2,9 +2,13 @@
 
 Personal dotfiles.
 
-- `sway/config` -> `~/.config/sway/config`
 - `bashrc` -> `~/.bashrc`
 - `tmux/tmux.conf` -> `~/.config/tmux/tmux.conf`
+- `mango/config.conf` -> `~/.config/mango/config.conf` (mangowm)
+- `void-setup.sh` - full system bootstrap (packages, services, GRUB, configs)
+- `configure-network.sh` - switch to NetworkManager
+
+Noctalia is installed from the [universalrepo](https://docs.noctalia.dev/noctalia/getting-started/installation/) XBPS repository.
 
 ## Void Linux setup
 

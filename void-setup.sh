@@ -26,7 +26,7 @@ PACKAGES=(
   tmux
   cargo
   tree-sitter-cli
-  sway
+  mangowc
   ghostty
   fuzzel
   bash-completion
@@ -164,13 +164,13 @@ else
   as_user git clone "$DOTFILES_REPO" "$DOTFILES_DIR"
 fi
 
-log "Linking sway config"
-SWAY_CONF="$TARGET_HOME/.config/sway/config"
-as_user mkdir -p "$TARGET_HOME/.config/sway"
-if [[ -e "$SWAY_CONF" && ! -L "$SWAY_CONF" ]]; then
-  as_user mv "$SWAY_CONF" "$SWAY_CONF.bak.$(date +%s)"
+log "Linking mango config"
+MANGO_CONF="$TARGET_HOME/.config/mango/config.conf"
+as_user mkdir -p "$TARGET_HOME/.config/mango"
+if [[ -e "$MANGO_CONF" && ! -L "$MANGO_CONF" ]]; then
+  as_user mv "$MANGO_CONF" "$MANGO_CONF.bak.$(date +%s)"
 fi
-as_user ln -sfn "$DOTFILES_DIR/sway/config" "$SWAY_CONF"
+as_user ln -sfn "$DOTFILES_DIR/mango/config.conf" "$MANGO_CONF"
 
 log "Linking tmux config"
 TMUX_CONF="$TARGET_HOME/.config/tmux/tmux.conf"

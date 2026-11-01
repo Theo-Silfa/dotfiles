@@ -46,6 +46,14 @@ Install (from a repo checkout, run as root; copies files, no symlinks):
 sudo bash setup-zzz-hooks.sh
 ```
 
+The script also installs a one-line sudoers rule to
+`/etc/sudoers.d/zzz` granting the invoking user passwordless
+`/usr/bin/zzz`, `/usr/bin/reboot` and `/usr/bin/poweroff` - each
+allowed only with no arguments (`""` in sudoers). The filename `zzz`
+sorts after the installer's `wheel` file and sudo uses last-match-wins,
+so NOPASSWD wins for these exact commands. The script validates the
+rule with `visudo` before installing it.
+
 Then verify with a dry run (`sudo zzz -n`, no actual suspend) and check
 that `cat /sys/devices/system/cpu/online` still shows `0-7`. The hooks
 are installed to `/etc/zzz.d/suspend/` and `/etc/zzz.d/resume/`; re-run

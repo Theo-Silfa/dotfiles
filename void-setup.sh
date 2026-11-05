@@ -42,9 +42,20 @@ PACKAGES=(
   linux-firmware-amd
   # session: system bus, seat/session management (elogind)
   dbus
-  elogind
+  # autostarts
+  dex
+  # network
   NetworkManager
+  # power plans, battery
+  upower
+  tlp
+  tlp-pd
+  # audio
+  pipewire
+  #shell
   noctalia
+  #for fans to work properly
+  mbpfan
 )
 
 NVIM_REPO="https://github.com/Theo-Silfa/init.lua.git"
@@ -79,7 +90,9 @@ SERVICES=(
   dbus
   elogind
   NetworkManager
-  noctalia
+  tlp
+  tlp-pd
+  mbpfan
 )
 
 log "Enabling runit services: ${SERVICES[*]}"
@@ -95,6 +108,9 @@ done
 
 log "Installing elogind sleep hooks (run from repo root after this script)"
 bash "$(dirname "$0")/setup-elogind.sh" || echo "Warning: elogind hook setup failed" >&2
+
+# ---------- root: autostarts ----------
+ln -s /usr/share/applications/pipewire.desktop /etc/xdg/autostart
 
 # ---------- root: GRUB kernel parameters ----------
 GRUB_PARAMS=(
@@ -131,6 +147,10 @@ if [[ -f "$GRUB_FILE" ]]; then
 else
   echo "Warning: $GRUB_FILE not found, skipping kernel parameters" >&2
 fi
+
+# ---------- root: pipewire-pulse interface ----------
+mkdir -p /etc/pipewire/pipewire.conf.d
+ln -s /usr/share/examples/pipewire/20-pipewire-pulse.conf /etc/pipewire/pipewire.conf.d/
 
 # ---------- user: dotfiles ----------
 

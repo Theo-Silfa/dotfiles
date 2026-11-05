@@ -40,10 +40,9 @@ PACKAGES=(
   mesa-dri
   linux-firmware-intel
   linux-firmware-amd
-  # session: system bus, user services, seat management
+  # session: system bus, seat/session management (elogind)
   dbus
-  turnstile
-  seatd
+  elogind
   NetworkManager
   noctalia
 )
@@ -78,8 +77,7 @@ xbps-remove -Ooy || true
 # ---------- root: runit services and groups ----------
 SERVICES=(
   dbus
-  turnstiled
-  seatd
+  elogind
   NetworkManager
   noctalia
 )
@@ -95,8 +93,8 @@ for svc in "${SERVICES[@]}"; do
   fi
 done
 
-log "Adding $TARGET_USER to the _seatd group"
-usermod -aG _seatd "$TARGET_USER"
+log "Installing elogind sleep hooks (run from repo root after this script)"
+bash "$(dirname "$0")/setup-elogind.sh" || echo "Warning: elogind hook setup failed" >&2
 
 # ---------- root: GRUB kernel parameters ----------
 GRUB_PARAMS=(

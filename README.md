@@ -7,8 +7,8 @@ Personal dotfiles.
 - `mango/config.conf` -> `~/.config/mango/config.conf` (mangowm)
 - `void-setup.sh` - full system bootstrap (packages, services, GRUB, configs)
 - `configure-network.sh` - switch to NetworkManager
-- `setup-zzz-hooks.sh` - install zzz suspend/resume hooks (copies, no symlinks)
-- `zzz/` - zzz hook scripts installed by `setup-zzz-hooks.sh`
+- `setup-elogind.sh` - migrate to elogind/loginctl: sleep hook, services, turnstile/seatd removal
+- `elogind/` - elogind system-sleep hook installed by `setup-elogind.sh`
 
 Noctalia is installed from the [universalrepo](https://docs.noctalia.dev/noctalia/getting-started/installation/) XBPS repository.
 
@@ -32,30 +32,31 @@ sudo bash configure-network.sh
 
 Then run `nmtui` (or `nmcli`) to configure Wi-Fi.
 
-## zzz suspend hooks (MacBookPro11,5)
+## elogind sleep hook (MacBookPro11,5)
 
 Without this workaround, resuming from S3/deep suspend stalls ~20-30s
-inside secondary-CPU bring-up during early resume. The hooks offline the
-currently online secondary CPUs before suspend and bring them back after
-resume, which keeps wake time at ~6-7s. Only CPUs recorded in the state
-file are restored; CPU0 and deliberately-offlined CPUs are never touched.
+inside secondary-CPU bring-up during early resume. The elogind system-sleep
+hook offlines the currently online secondary CPUs before suspend and brings
+them back after resume, which keeps wake time at ~6-7s. Only CPUs recorded
+in the state file are restored; CPU0 and deliberately-offlined CPUs are
+never touched.
 
-Install (from a repo checkout, run as root; copies files, no symlinks):
+Suspend goes through elogind (`loginctl suspend`, lid close, the Noctalia
+button), which runs hooks in `/etc/elogind/system-sleep/` with `pre`/`post`
+and the operation as arguments ([elogind docs](https://github.com/elogind/elogind)).
+
+Install / migrate (from a repo checkout, run as root; copies files, no
+symlinks; also enables elogind and removes turnstile, seatd and acpid):
 
 ```
-sudo bash setup-zzz-hooks.sh
+sudo bash setup-elogind.sh
 ```
 
-The script also installs a one-line sudoers rule to
-`/etc/sudoers.d/zzz` granting the invoking user passwordless
-`/usr/bin/zzz`, `/usr/bin/reboot` and `/usr/bin/poweroff` - each
-allowed only with no arguments (`""` in sudoers). The filename `zzz`
-sorts after the installer's `wheel` file and sudo uses last-match-wins,
-so NOPASSWD wins for these exact commands. The script validates the
-rule with `visudo` before installing it.
+The script also removes the old zzz hooks and sudoers rule. After it:
+remove the `[shell.session.power]` overrides from
+`~/.config/noctalia/*.toml` (Noctalia auto-detects `loginctl` again),
+reboot, and verify with `loginctl` that your session shows `Active=yes`.
 
-Then verify with a dry run (`sudo zzz -n`, no actual suspend) and check
-that `cat /sys/devices/system/cpu/online` still shows `0-7`. The hooks
-are installed to `/etc/zzz.d/suspend/` and `/etc/zzz.d/resume/`; re-run
-the setup script to update them. State is kept in `/run` (tmpfs), so it
+Then test a real suspend (UI button and lid close); `cat /sys/devices/system/cpu/online`
+should show `0-7` after waking. State is kept in `/run` (tmpfs), so it
 cannot go stale across reboots.

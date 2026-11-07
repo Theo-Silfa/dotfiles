@@ -225,6 +225,28 @@ if [[ -e "$GHOSTTY_CONF" && ! -L "$GHOSTTY_CONF" ]]; then
 fi
 as_user ln -sfn "$DOTFILES_DIR/ghostty/config" "$GHOSTTY_CONF"
 
+log "Linking Noctalia config and settings"
+NOCTALIA_CONF="$TARGET_HOME/.config/noctalia/config.toml"
+NOCTALIA_SETTINGS="$TARGET_HOME/.local/state/noctalia/settings.toml"
+as_user mkdir -p "$(dirname "$NOCTALIA_CONF")" "$(dirname "$NOCTALIA_SETTINGS")"
+for file in config.toml settings.toml; do
+  if [[ ! -f "$DOTFILES_DIR/noctalia/$file" ]]; then
+    echo "Error: Noctalia source file missing: $DOTFILES_DIR/noctalia/$file" >&2
+    exit 1
+  fi
+done
+for file in config.toml settings.toml; do
+  if [[ "$file" == config.toml ]]; then
+    dest="$NOCTALIA_CONF"
+  else
+    dest="$NOCTALIA_SETTINGS"
+  fi
+  if [[ -e "$dest" && ! -L "$dest" ]]; then
+    as_user mv "$dest" "$dest.bak.$(date +%s)"
+  fi
+  as_user ln -sfn "$DOTFILES_DIR/noctalia/$file" "$dest"
+done
+
 log "Linking bashrc"
 BASHRC="$TARGET_HOME/.bashrc"
 if [[ -e "$BASHRC" && ! -L "$BASHRC" ]]; then

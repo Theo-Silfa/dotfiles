@@ -5,6 +5,9 @@ Personal dotfiles.
 - `bashrc` -> `~/.bashrc`
 - `tmux/tmux.conf` -> `~/.config/tmux/tmux.conf`
 - `mango/config.conf` -> `~/.config/mango/config.conf` (mangowm)
+- `ghostty/config` -> `~/.config/ghostty/config`
+- `noctalia/config.toml` -> `~/.config/noctalia/config.toml`
+- `noctalia/settings.toml` -> `~/.local/state/noctalia/settings.toml`
 - `void-setup.sh` - full system bootstrap (packages, services, GRUB, configs)
 - `configure-network.sh` - switch to NetworkManager
 - `setup-elogind.sh` - migrate to elogind/loginctl: sleep hook, services, turnstile/seatd removal
@@ -12,6 +15,12 @@ Personal dotfiles.
 - `mango/config.conf` binds keyboard backlight keys to `brillo`
 
 Noctalia is installed from the [universalrepo](https://docs.noctalia.dev/noctalia/getting-started/installation/) XBPS repository.
+
+The setup script backs up existing non-symlink Noctalia files before linking.
+GUI changes write through the settings symlink into the repository's
+`noctalia/settings.toml`; review those changes before committing.
+The separate config and state paths follow
+[Noctalia's configuration layout](https://docs.noctalia.dev/noctalia/configuration/).
 
 ## Void Linux setup
 

@@ -52,10 +52,12 @@ PACKAGES=(
   tlp-pd
   # audio
   pipewire
-  #shell
+  # shell
   noctalia
-  #for fans to work properly
+  # for fans to work properly
   mbpfan
+  # for keyboard backlight
+  brillo
 )
 
 NVIM_REPO="https://github.com/Theo-Silfa/init.lua.git"

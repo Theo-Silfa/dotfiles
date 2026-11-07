@@ -42,6 +42,7 @@ PACKAGES=(
   linux-firmware-amd
   # session: system bus, seat/session management (elogind)
   dbus
+  elogind
   # autostarts
   dex
   # network
@@ -113,9 +114,6 @@ for svc in "${SERVICES[@]}"; do
     ln -s "/etc/sv/$svc" /var/service/
   fi
 done
-
-log "Installing elogind sleep hooks (run from repo root after this script)"
-bash "$(dirname "$0")/setup-elogind.sh" || echo "Warning: elogind hook setup failed" >&2
 
 # ---------- root: autostarts ----------
 mkdir -p /etc/xdg/autostart
@@ -201,6 +199,20 @@ else
   as_user git clone "$DOTFILES_REPO" "$DOTFILES_DIR"
 fi
 
+# ---------- root: elogind sleep hook ----------
+# Copy the hook from the prepared checkout, so this also works when the
+# bootstrap script was downloaded and run without a local repo checkout.
+log "Installing elogind CPU sleep hook"
+ELOGIND_HOOK_SRC="$DOTFILES_DIR/elogind/system-sleep/10-macbook-cpu"
+ELOGIND_HOOK_DIR=/etc/elogind/system-sleep
+if [[ ! -f "$ELOGIND_HOOK_SRC" ]]; then
+  echo "Error: elogind sleep hook missing: $ELOGIND_HOOK_SRC" >&2
+  exit 1
+fi
+install -d -m 755 "$ELOGIND_HOOK_DIR"
+install -o root -g root -m 755 "$ELOGIND_HOOK_SRC" "$ELOGIND_HOOK_DIR/10-macbook-cpu"
+
+# ---------- user: config links ----------
 log "Linking mango config"
 MANGO_CONF="$TARGET_HOME/.config/mango/config.conf"
 as_user mkdir -p "$TARGET_HOME/.config/mango"

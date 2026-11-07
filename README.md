@@ -10,8 +10,7 @@ Personal dotfiles.
 - `noctalia/settings.toml` -> `~/.local/state/noctalia/settings.toml`
 - `void-setup.sh` - full system bootstrap (packages, services, GRUB, configs)
 - `configure-network.sh` - switch to NetworkManager
-- `setup-elogind.sh` - migrate to elogind/loginctl: sleep hook, services, turnstile/seatd removal
-- `elogind/` - elogind system-sleep hook installed by `setup-elogind.sh`
+- `elogind/` - elogind system-sleep hook copied into place by `void-setup.sh`
 - `mango/config.conf` binds keyboard backlight keys to `brillo`
 
 Noctalia is installed from the [universalrepo](https://docs.noctalia.dev/noctalia/getting-started/installation/) XBPS repository.
@@ -55,17 +54,11 @@ Suspend goes through elogind (`loginctl suspend`, lid close, the Noctalia
 button), which runs hooks in `/etc/elogind/system-sleep/` with `pre`/`post`
 and the operation as arguments ([elogind docs](https://github.com/elogind/elogind)).
 
-Install / migrate (from a repo checkout, run as root; copies files, no
-symlinks; also enables elogind and removes turnstile, seatd and acpid):
-
-```
-sudo bash setup-elogind.sh
-```
-
-The script also removes the old zzz hooks and sudoers rule. After it:
-remove the `[shell.session.power]` overrides from
-`~/.config/noctalia/*.toml` (Noctalia auto-detects `loginctl` again),
-reboot, and verify with `loginctl` that your session shows `Active=yes`.
+`void-setup.sh` installs the elogind package, enables its service, and copies
+the hook from the prepared `~/.dotfiles` checkout to
+`/etc/elogind/system-sleep/10-macbook-cpu` as a root-owned executable.
+The hook is copied, not symlinked. No separate elogind setup script is needed.
+After setup, reboot and verify your session with `loginctl session-status`.
 
 Then test a real suspend (UI button and lid close); `cat /sys/devices/system/cpu/online`
 should show `0-7` after waking. State is kept in `/run` (tmpfs), so it

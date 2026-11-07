@@ -118,7 +118,11 @@ log "Installing elogind sleep hooks (run from repo root after this script)"
 bash "$(dirname "$0")/setup-elogind.sh" || echo "Warning: elogind hook setup failed" >&2
 
 # ---------- root: autostarts ----------
-ln -s /usr/share/applications/pipewire.desktop /etc/xdg/autostart
+mkdir -p /etc/xdg/autostart
+PIPEWIRE_AUTOSTART=/etc/xdg/autostart/pipewire.desktop
+if [[ ! -e "$PIPEWIRE_AUTOSTART" && ! -L "$PIPEWIRE_AUTOSTART" ]]; then
+  ln -s /usr/share/applications/pipewire.desktop "$PIPEWIRE_AUTOSTART"
+fi
 
 # ---------- root: GRUB kernel parameters ----------
 GRUB_PARAMS=(
@@ -158,7 +162,10 @@ fi
 
 # ---------- root: pipewire-pulse interface ----------
 mkdir -p /etc/pipewire/pipewire.conf.d
-ln -s /usr/share/examples/pipewire/20-pipewire-pulse.conf /etc/pipewire/pipewire.conf.d/
+PIPEWIRE_PULSE_CONF=/etc/pipewire/pipewire.conf.d/20-pipewire-pulse.conf
+if [[ ! -e "$PIPEWIRE_PULSE_CONF" && ! -L "$PIPEWIRE_PULSE_CONF" ]]; then
+  ln -s /usr/share/examples/pipewire/20-pipewire-pulse.conf "$PIPEWIRE_PULSE_CONF"
+fi
 
 # ---------- user: dotfiles ----------
 

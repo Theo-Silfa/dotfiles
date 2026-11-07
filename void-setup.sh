@@ -210,6 +210,14 @@ if [[ -e "$TMUX_CONF" && ! -L "$TMUX_CONF" ]]; then
 fi
 as_user ln -sfn "$DOTFILES_DIR/tmux/tmux.conf" "$TMUX_CONF"
 
+log "Linking ghostty config"
+GHOSTTY_CONF="$TARGET_HOME/.config/ghostty/config"
+as_user mkdir -p "$TARGET_HOME/.config/ghostty"
+if [[ -e "$GHOSTTY_CONF" && ! -L "$GHOSTTY_CONF" ]]; then
+  as_user mv "$GHOSTTY_CONF" "$GHOSTTY_CONF.bak.$(date +%s)"
+fi
+as_user ln -sfn "$DOTFILES_DIR/ghostty/config" "$GHOSTTY_CONF"
+
 log "Linking bashrc"
 BASHRC="$TARGET_HOME/.bashrc"
 if [[ -e "$BASHRC" && ! -L "$BASHRC" ]]; then

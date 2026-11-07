@@ -86,6 +86,19 @@ xbps-install -Suy
 log "Installing packages: ${PACKAGES[*]}"
 xbps-install -y "${PACKAGES[@]}"
 
+# Use the policy supplied by Void's brillo package, not a dotfiles copy.
+# A normal install provides it; reinstall only if an existing installation
+# is missing the file. Keep ownership and future updates managed by XBPS.
+BRILLO_POLICY=/usr/share/polkit-1/actions/com.gitlab.CameronNemo.brillo.policy
+log "Ensuring the packaged brillo polkit policy is installed"
+if [[ ! -s "$BRILLO_POLICY" ]]; then
+  xbps-install -fy brillo
+fi
+if [[ ! -s "$BRILLO_POLICY" ]]; then
+  echo "Error: brillo's packaged policy is missing: $BRILLO_POLICY" >&2
+  exit 1
+fi
+
 log "Cleaning package cache and orphans"
 xbps-remove -Ooy || true
 

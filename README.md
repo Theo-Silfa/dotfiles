@@ -11,6 +11,11 @@ Personal dotfiles.
 - `elogind/` - elogind system-sleep hook installed by `setup-elogind.sh`
 - `mango/config.conf` binds keyboard backlight keys to `brillo`
 
+`void-setup.sh` uses the polkit policy shipped by Void's `brillo` package.
+It reinstalls the package if the policy is missing, without maintaining a
+separate policy copy in this repository. Keyboard bindings remain plain
+`brillo` commands.
+
 Noctalia is installed from the [universalrepo](https://docs.noctalia.dev/noctalia/getting-started/installation/) XBPS repository.
 
 ## Void Linux setup

@@ -9,6 +9,8 @@ Personal dotfiles.
 - `configure-network.sh` - switch to NetworkManager
 - `setup-elogind.sh` - migrate to elogind/loginctl: sleep hook, services, turnstile/seatd removal
 - `elogind/` - elogind system-sleep hook installed by `setup-elogind.sh`
+- `polkit/` - polkit policy files installed by `void-setup.sh`
+- `mango/config.conf` binds keyboard backlight keys to `pkexec /usr/bin/brillo`
 
 Noctalia is installed from the [universalrepo](https://docs.noctalia.dev/noctalia/getting-started/installation/) XBPS repository.
 

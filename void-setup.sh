@@ -50,6 +50,8 @@ PACKAGES=(
   upower
   tlp
   tlp-pd
+  # authorization for tlp-pd and brillo pkexec
+  polkit
   # audio
   pipewire
   # shell
@@ -91,6 +93,7 @@ xbps-remove -Ooy || true
 SERVICES=(
   dbus
   elogind
+  polkitd
   NetworkManager
   tlp
   tlp-pd
@@ -110,6 +113,14 @@ done
 
 log "Installing elogind sleep hooks (run from repo root after this script)"
 bash "$(dirname "$0")/setup-elogind.sh" || echo "Warning: elogind hook setup failed" >&2
+
+log "Installing brillo polkit policy (keyboard backlight without root)"
+POLICY_SRC="$(dirname "$0")/polkit/brillo.policy"
+if [[ -f "$POLICY_SRC" ]]; then
+  install -Dm 644 "$POLICY_SRC" /usr/share/polkit-1/actions/com.gitlab.CameronNemo.brillo.policy
+else
+  echo "Warning: $POLICY_SRC not found (repo checkout needed); the Void brillo package ships the same policy anyway" >&2
+fi
 
 # ---------- root: autostarts ----------
 ln -s /usr/share/applications/pipewire.desktop /etc/xdg/autostart

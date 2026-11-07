@@ -60,6 +60,9 @@ PACKAGES=(
   mbpfan
   # for keyboard backlight
   brillo
+  # fonts
+  font-ibm-plex-ttf
+  font-iosevka
 )
 
 NVIM_REPO="https://github.com/Theo-Silfa/init.lua.git"

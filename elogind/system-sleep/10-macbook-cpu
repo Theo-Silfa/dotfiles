@@ -19,6 +19,15 @@ log() { logger -t "$LOG_TAG" -- "$1" 2>/dev/null || echo "$LOG_TAG: $1" >&2; }
 
 case "$1" in
 pre)
+    # Ask for S3 (deep) sleep. Best effort: keep going if the write
+    # fails, the kernel will use whatever mem_sleep mode is currently
+    # selected. (Restored from the old zzz suspend hook, which the
+    # elogind migration dropped; without it suspend follows the kernel
+    # default, which may be s2idle.)
+    if [ -w /sys/power/mem_sleep ]; then
+        printf 'deep' > /sys/power/mem_sleep 2>/dev/null || log "could not select deep mem_sleep"
+    fi
+
     # A leftover state file means the post hook never ran; do not
     # offline twice or overwrite the record of what needs restoring.
     if [ -e "$STATE" ]; then

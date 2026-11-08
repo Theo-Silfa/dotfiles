@@ -50,6 +50,10 @@ them back after resume, which keeps wake time at ~6-7s. Only CPUs recorded
 in the state file are restored; CPU0 and deliberately-offlined CPUs are
 never touched.
 
+The hook also selects `deep` (S3) in `/sys/power/mem_sleep` before suspend,
+restoring the behaviour of the old zzz suspend hook; without it, suspend
+follows the kernel's default mode, which may be s2idle.
+
 Suspend goes through elogind (`loginctl suspend`, lid close, the Noctalia
 button), which runs hooks in `/etc/elogind/system-sleep/` with `pre`/`post`
 and the operation as arguments ([elogind docs](https://github.com/elogind/elogind)).

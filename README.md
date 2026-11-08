@@ -67,3 +67,23 @@ After setup, reboot and verify your session with `loginctl session-status`.
 Then test a real suspend (UI button and lid close); `cat /sys/devices/system/cpu/online`
 should show `0-7` after waking. State is kept in `/run` (tmpfs), so it
 cannot go stale across reboots.
+
+## Toggling between elogind and zzz+acpid suspend
+
+Two scripts toggle the suspend path; both keep elogind running for
+session/seat management, only the ACPI event handling and sleep hooks
+change. Each undoes the other.
+
+- `sudo bash setup-zzz-acpid.sh` - back to the zzz path: installs the
+  `zzz/` hooks into `/etc/zzz.d`, the passwordless sudoers rule for
+  `zzz`/`reboot`/`poweroff`, and acpid. Void's default
+  `/etc/acpi/handler.sh` then calls `zzz` on lid close and the sleep
+  button, and shuts down on the power button. elogind is told to ignore
+  those events via a `logind.conf.d` drop-in, because elogind and acpid
+  both acting on them causes double suspends, and the elogind
+  system-sleep hook is removed. In this mode `loginctl suspend` still
+  suspends, but without the CPU offlining - use `sudo zzz` or the lid.
+- `sudo bash setup-elogind.sh` - back to elogind: reinstalls the
+  elogind system-sleep hook, removes the `logind.conf.d` drop-in,
+  disables acpid (does not remove the package), and removes the zzz
+  hooks and sudoers rule.

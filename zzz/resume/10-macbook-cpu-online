@@ -1,0 +1,40 @@
+#!/bin/sh
+# zzz resume hook: bring secondary CPUs back online after resume.
+#
+# Counterpart to zzz/suspend/10-macbook-cpu-offline. Only onlines the
+# CPUs recorded in the state file (never touches cpu0 or CPUs that were
+# deliberately offline before suspend). zzz runs hooks as root.
+
+STATE=/run/zzz-macbook-cpu-offline.state
+LOG_TAG=zzz-macbook-cpu
+
+log() { logger -t "$LOG_TAG" -- "$1" 2>/dev/null || echo "$LOG_TAG: $1" >&2; }
+
+# No state file: suspend hook did not offline anything, or the machine
+# rebooted since. Nothing to do.
+if [ ! -f "$STATE" ]; then
+    exit 0
+fi
+
+failed=0
+for cpu in $(cat "$STATE"); do
+    f=/sys/devices/system/cpu/cpu$cpu/online
+    if [ ! -f "$f" ]; then
+        log "cpu$cpu online sysfs file missing"
+        failed=1
+        continue
+    fi
+    if ! echo 1 > "$f" 2>/dev/null; then
+        log "failed to online cpu$cpu"
+        failed=1
+    fi
+done
+
+rm -f "$STATE"
+
+if [ "$failed" = 0 ]; then
+    log "restored CPUs"
+else
+    log "finished with errors, check $(cat /sys/devices/system/cpu/online 2>/dev/null)"
+fi
+exit 0

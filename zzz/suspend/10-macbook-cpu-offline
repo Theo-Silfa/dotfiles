@@ -1,0 +1,59 @@
+#!/bin/sh
+# zzz suspend hook: offline secondary CPUs before suspend.
+#
+# Workaround for MacBookPro11,5 (Void Linux, radeon, S3/deep sleep):
+# restoring secondary CPUs during early S3 resume stalls for ~20s.
+# Offlining them before suspend and onlining them after resume keeps
+# wake time at ~6-7s. See zzz/resume/10-macbook-cpu-online.
+#
+# State is kept in /run (tmpfs) so a stale file cannot survive a reboot.
+# zzz runs hooks as root and ignores hook failures (this version does not
+# abort on a failing hook), so this hook restores nothing itself.
+
+STATE=/run/zzz-macbook-cpu-offline.state
+LOG_TAG=zzz-macbook-cpu
+
+log() { logger -t "$LOG_TAG" -- "$1" 2>/dev/null || echo "$LOG_TAG: $1" >&2; }
+
+# Ask for S3 (deep) sleep. Best effort: keep going if the write fails,
+# the kernel will use whatever mem_sleep mode is currently selected.
+if [ -w /sys/power/mem_sleep ]; then
+    printf 'deep' > /sys/power/mem_sleep 2>/dev/null || log "could not select deep mem_sleep"
+fi
+
+# A leftover state file means the resume hook never ran; do not offline
+# twice or overwrite the record of what needs restoring.
+if [ -e "$STATE" ]; then
+    log "stale state file $STATE present, skipping suspend hook"
+    exit 0
+fi
+
+# Collect currently online secondary CPUs (cpu0 has no online file).
+cpus=""
+for f in /sys/devices/system/cpu/cpu[1-9]*/online; do
+    [ -f "$f" ] || continue
+    [ "$(cat "$f" 2>/dev/null)" = "1" ] || continue
+    cpu=${f%/online}
+    cpu=${cpu##*/cpu}
+    cpus="$cpus $cpu"
+done
+
+# Nothing to offline (single-CPU state): nothing to record.
+[ -n "$cpus" ] || exit 0
+
+# Record first, offline second: if a single offline write fails the
+# resume hook still knows everything that was taken down.
+printf '%s\n' $cpus > "$STATE.tmp" && mv "$STATE.tmp" "$STATE" || {
+    log "could not write state file $STATE, aborting"
+    exit 0
+}
+
+for cpu in $cpus; do
+    f=/sys/devices/system/cpu/cpu$cpu/online
+    if ! echo 0 > "$f" 2>/dev/null; then
+        log "failed to offline cpu$cpu"
+    fi
+done
+
+log "offlined CPUs:$cpus"
+exit 0

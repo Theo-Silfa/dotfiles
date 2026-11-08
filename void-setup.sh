@@ -55,6 +55,7 @@ PACKAGES=(
   polkit
   # audio
   pipewire
+  wireplumber
   # shell
   noctalia
   # for fans to work properly
@@ -115,6 +116,16 @@ for svc in "${SERVICES[@]}"; do
   fi
 done
 
+# ---------- root: disable services ----------
+# acpid is not needed: power/suspend events are handled by elogind
+log "Disabling acpid service"
+if [[ -e /var/service/acpid || -L /var/service/acpid ]]; then
+  sv down acpid 2>/dev/null || true
+  rm -f /var/service/acpid
+else
+  echo "acpid already disabled"
+fi
+
 # ---------- root: autostarts ----------
 mkdir -p /etc/xdg/autostart
 PIPEWIRE_AUTOSTART=/etc/xdg/autostart/pipewire.desktop
@@ -163,6 +174,13 @@ mkdir -p /etc/pipewire/pipewire.conf.d
 PIPEWIRE_PULSE_CONF=/etc/pipewire/pipewire.conf.d/20-pipewire-pulse.conf
 if [[ ! -e "$PIPEWIRE_PULSE_CONF" && ! -L "$PIPEWIRE_PULSE_CONF" ]]; then
   ln -s /usr/share/examples/pipewire/20-pipewire-pulse.conf "$PIPEWIRE_PULSE_CONF"
+fi
+
+# ---------- root: wireplumber session manager ----------
+# Launch wireplumber from the main pipewire process for correct startup ordering
+WIREPLUMBER_CONF=/etc/pipewire/pipewire.conf.d/10-wireplumber.conf
+if [[ ! -e "$WIREPLUMBER_CONF" && ! -L "$WIREPLUMBER_CONF" ]]; then
+  ln -s /usr/share/examples/wireplumber/10-wireplumber.conf "$WIREPLUMBER_CONF"
 fi
 
 # ---------- user: dotfiles ----------
